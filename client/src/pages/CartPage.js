@@ -66,6 +66,7 @@ const CartPage = () => {
       const { data } = await axios.post("/api/v1/product/braintree/payment", {
         nonce,
         cart,
+        address: auth?.user?.address,
       });
       setLoading(false);
       localStorage.removeItem("cart");

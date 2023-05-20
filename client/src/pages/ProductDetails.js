@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import Layout from "./../components/Layout/Layout";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import "./ProductDetailsStyles.css";
+import { useCart } from "../context/cart";
+import toast from "react-hot-toast";
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [cart, setCart] = useCart();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  //initalp details
+  //initial details
   useEffect(() => {
     if (params?.slug) getProduct();
   }, [params?.slug]);
+
   //getProduct
   const getProduct = async () => {
     try {
@@ -26,7 +29,8 @@ const ProductDetails = () => {
       console.log(error);
     }
   };
-  //get similar product
+
+  //get similar products
   const getSimilarProduct = async (pid, cid) => {
     try {
       const { data } = await axios.get(
@@ -36,13 +40,6 @@ const ProductDetails = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const addToCart = (product) => {
-    const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
-    cartItems.push(product);
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-    navigate("/cart"); // Redirect to the cart page
   };
   return (
     <Layout>
@@ -69,7 +66,16 @@ const ProductDetails = () => {
             })}
           </h6>
           <h6>Category : {product?.category?.name}</h6>
-          <button class="btn btn-secondary ms-1">ADD TO CART</button>
+          <button
+            className="btn btn-dark ms-1"
+            onClick={() => {
+              setCart([...cart, product]);
+              localStorage.setItem("cart", JSON.stringify([...cart, product]));
+              toast.success("Item Added to cart");
+            }}
+          >
+            ADD TO CART
+          </button>
         </div>
       </div>
       <hr />
@@ -105,12 +111,6 @@ const ProductDetails = () => {
                     onClick={() => navigate(`/product/${p.slug}`)}
                   >
                     More Details
-                  </button>
-                  <button
-                    className="btn btn-dark ms-1"
-                    onClick={() => addToCart()}
-                  >
-                    ADD TO CART
                   </button>
                 </div>
               </div>
